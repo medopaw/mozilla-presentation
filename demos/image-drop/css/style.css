@@ -1,0 +1,32 @@
+html, body, article {
+	width: 100%;
+	height: 100%;
+}
+body {
+	background-color: #222;
+	color: #fff;
+	font: 13px serif;
+	background-size: cover;
+}
+article {
+  display: box;
+  box-orient: horizontal;
+  box-pack: center;
+  box-align: center;
+}
+
+#action-store {
+	display: none;
+	font-weight: bold;
+}
+.state-loaded #action-store {
+	display: inline;
+}
+
+#controls {
+	text-align: center;
+	margin-top: 10px;
+}
+.has-storage #action-store {
+	display: none;
+}

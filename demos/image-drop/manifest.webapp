@@ -1,0 +1,20 @@
+{
+	"version": "1.0",
+	"name": "A Demo",
+	"description": "A Web API Demo!",
+	"icons": {
+		"128": "/icon-128.png"
+	},
+	"launch_path": "/index.html",
+	"developer": {
+		"name": "Harald Kirschner",
+		"url": "http://digitarald.de"
+	},
+	"permissions": {
+		"device-storage": {
+			"description": "Saving pictures of kittens with hip filters applied",
+			"access": "readcreate"
+		}
+	},
+	"fullscreen": true
+}

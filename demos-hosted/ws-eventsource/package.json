@@ -1,0 +1,22 @@
+{
+  "name": "eventsource-twitter-demo",
+  "version": "0.0.1-13",
+  "main": "app.js",
+  "dependencies": {
+    "express": "3.0.x",
+    "ejs": "0.8.x",
+    "ntwitter": "0.5.x",
+    "ws": "0.4.x"
+  },
+  "engines": {
+    "node": "0.8.x",
+    "npm": "1.1.x"
+  },
+  "scripts": {
+    "test": "jshint app.js",
+    "start": "node app.js"
+  },
+  "author": "Harald Kirschner",
+  "license": "MIT",
+  "subdomain": "digitarald.eventsource-twitter"
+}

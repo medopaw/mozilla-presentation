@@ -1,0 +1,1145 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>Apps Dissected</title>
+
+		<meta name="description" content="Apps Dissected">
+		<meta name="author" content="Harald Kirschner">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/mozilla/mozilla-theme.css" id="theme">
+
+		<!-- For syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- If the query includes 'print-pdf', use the PDF print sheet -->
+		<script>
+			document.write( '<link rel="stylesheet" href="css/print/' + ( window.location.search.match( /print-pdf/gi ) ? 'pdf' : 'paper' ) + '.css" type="text/css" media="print">' );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+
+				<section>
+					<h1>Apps Dissected</h1>
+					<h2>APIs as Awesome Sauce</h2>
+					<p>
+						<small>Harald "digitarald" Kirschner, <a href="http://twitter.com/digitarald">@digitarald</a> &amp; <a href="mailto:harald@mozilla.com.com">harald@mozilla.com</a></small>
+					</p>
+          <aside class="notes">
+* I am excited about APIs, on Firefox OS and the other App platforms.
+* If I speak too fast slow me down with a hand signal.
+* I hope I can make you as excited about APIs
+* Only 30min, ask me later about anything that caught your eye
+          </aside>
+				</section>
+
+				<section>
+					<h2>Who discovered a new HTML5 API at MozCamp?</h2>
+
+					<aside class="notes">
+* Who is developing apps for the *Web*; *Native*; *Product/Project Manages*?
+					</aside>
+				</section>
+
+				<section>
+					<h2>Apps and Me!</h2>
+					<h3>Partner Engineer, Labs Scientist, Web Craftsman</h3>
+					<p>... Neonomade, Cook, Musician, Expecting Father</p>
+					<aside class="notes">
+* Guiding Mozilla's partners for the Firefox Marketplace.
+* Integrate their apps into the platform.
+* Working on Mozilla's Apps Android runtime and tools.
+					</aside>
+				</section>
+
+        <section>
+          <h2>Is a Website a Web App?</h2>
+          <aside class="notes">
+* Runs on the web.
+* Run in sandboxe (the browser) and doesn't integrate into the platform.
+          </aside>
+        </section>
+
+        <section>
+          <h2>Is a Bookmark a Web App?</h2>
+          <aside class="notes">
+* Permissions are still explicit.
+          </aside>
+        </section>
+
+				<section>
+					<h2>What makes a Web App</h2>
+          <ul>
+            <li class="fragment">Deep Platform Integration</li>
+            <li class="fragment">Distribution and Discovery Model</li>
+            <li class="fragment">Implicit Storage capacities</li>
+            <li class="fragment">Implicit API permissions</li>
+          </ul>
+					<p></p>
+					<aside class="notes">
+* Integrates into the platform it runs on.
+* Streamlines access with implicit permissions. More APIs.
+* Integration: Persona, In-app Payments!
+* Another distribution model.
+* Aesthetics: chromeless, full-screen
+					</aside>
+				</section>
+
+				<section>
+					<h2>The Web is the Platform</h2>
+					<p>... and it gives you plenty of access if you ask for it in the right way.</p>
+          <aside class="notes">
+* And since Apps have more access
+          </aside>
+				</section>
+
+				<section>
+					<h2>Types of Apps</h2>
+					<ul>
+						<li class="fragment"><strong>Web Content</strong>: Not really an app.</li>
+						<li class="fragment"><strong>Hosted Web Apps</strong>: Get implicit storage APIs and Permissions described in manifest.</li>
+						<li class="fragment"><strong>Packaged Web App</strong>: Content Security Policy (CSP) and Code Reviews</li>
+						<li class="fragment"><strong>Privileged Packaged Apps</strong>: Equivalent in capability/security to other mobile apps.</li>
+					</ul>
+					<aside class="notes">
+* How much access gets each type ...
+* *Manifest Fields*: alarm, backgroundservice, bluetooth, browser, camera, contacts, desktop-notification, device-storage, fmradio, geolocation, mobileconnection, power, push, settings, sms, storage, systemclock, network-http, network-tcp, telephony, wake-lock-screen, webapps-manage, wifi ...
+* Packaged: With great powers comes with great responsibility; CSP
+* Equivalent in capability and security to apps on other mobile platforms. Reviewed and approved by app store. CSP: Enable Review - no external resources. Signing is missing.
+					</aside>
+				</section>
+
+        <section>
+          <h2>Your Mission <small>(should you accept ...)</small></h2>
+          <ol>
+            <li>Think of an App</li>
+            <li>Take as many APIs (as possible)</li>
+            <li>Present and discuss it!</li>
+            <li>Hack it!</li>
+          </ol>
+        </section>
+
+				<section>
+					<h2>Here be Code!</h2>
+					<ul>
+						<li>Always check documentation for correct prefixes!</li>
+            <li>Some semicolons might be missing as well!</li>
+					</ul>
+					<aside class="notes">
+* Single APIs presented in example code. Best demos use multiple APIs in unison.
+* Reference for later
+* **PREFIXES missing in some cases**
+* **Question**: How deep do you want to dive into code?
+					</aside>
+				</section>
+
+				<section>
+					<section>
+						<h2>Open Web Apps</h2>
+						<p>Install and verify app installations.</p>
+						<pre><code contenteditable>// TODO: Check proper error
+var request = navigator.mozApps.getSelf();
+request.onsuccess = function() {
+  console.log(request.result.receipt);
+});
+request.onerror = function() {
+  // Install if app is not installed
+  if (!request.result) {
+    navigator.mozApps.install('http://www.mine.com/manifest.webapp');
+  }
+}</code></pre>
+						<small>
+							<ul>
+                <li><strong>Use</strong>: Detect app installation on landing page. Marketplace receipt validation.</li>
+                <li><strong>Gotchas</strong>: The app object in the <code>request.result</code> is only available within the app.</li>
+              </ul>
+						</small>
+          <aside class="notes">
+* Request instance as event emitter and result container.
+          </aside>
+					</section>
+					<section>
+						<h3>In-App Payments</h3>
+						<p>Prompt for payments and verify receipts.</p>
+						<pre><code contenteditable>let request = navigator.mozPay([signedJWT1, signedJWTn]);
+request.onsuccess = function () {
+  // A signed JWT got posted back to the server
+}
+request.onerror = function () {
+  // User cancelled or something went wrong
+}</code></pre>
+            <small>
+						  <ul>
+                <li><strong>JWT</strong>: Signed JSON Web Token using server-side code.</li>
+						  </ul>
+            </small>
+            <aside class="notes">
+* Apple/Android in-app payment - Web-based one-click in-app payments
+* Sell pink cows, bigger weapons, more storage or premium features.
+            </aside>
+					</section>
+				</section>
+
+				<section>
+					<h2>Page Visibility</h2>
+					<p>Detect if the window/tab is visible or hidden.</p>
+					<pre><code contenteditable>document.addEventListener('visibilitychange', function() {
+  if (document.hidden) {
+    myVideo.pause();
+  } else {
+    myVideo.play();
+  }
+}, false);</code></pre>
+					<small>
+						<ul>
+              <li><strong>Use</strong>: Stop Slideshows. Control Live Streams.</li>
+              <li><strong>Gotchas</strong>: <code>requestAnimationFrame</code> already stops being called when a tab hides. Audio and Video don't.</li>
+            </ul>
+					</small>
+          <aside class="notes">
+* Hacks to detect window focus - Listen to tab/mobile-window visibility
+* Sell pink cows, bigger weapons, more storage or premium features.
+          </aside>
+				</section>
+
+        <section>
+          <section>
+            <h2>Canvas</h2>
+            <p>2D pixel-manipulation, now hardware-accelerated.</p>
+            <pre><code contenteditable>var canvas = document.getElementById('tutorial');
+var ctx = canvas.getContext('2d');
+ctx.fillStyle = 'rgb(200,0,0)';
+ctx.fillRect (10, 10, 55, 50);
+ctx.fillStyle = 'rgba(0, 0, 200, 0.5)';
+ctx.fillRect (30, 30, 55, 50);</code></pre>
+            <small>
+              <ul>
+                <li><strong>Tips</strong>: Mix and match freely with all the other APIs.</li>
+                <li><strong>Reference</strong>: For doing interactve visualizations, SVG might be a viable alternative.</li>
+              </ul>
+            </small>
+            <aside class="notes">
+  * Flash for rich graphics - Rich GPU-accelerated graphics
+  * Sell pink cows, bigger weapons, more storage or premium features.
+            </aside>
+          </section>
+          <section>
+            <h3>Games!</h3>
+            <img src="img/lou.jpg" />
+            <p>
+              <a href="http://www.lordofultima.com/" target="_blank">Electronic Arts: Lord of Ultima</a>
+            </p>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h2>WebGL</h2>
+            <p>OpenGL goes web, the 3D context for canvas.</p>
+            <iframe src="https://www.khronos.org/registry/webgl/sdk/demos/webkit/SpiritBox.html" width="455" height="356"></iframe>
+            <small>
+              <ul>
+                <li><strong>Tips</strong>: New to OpenGL? Use a library, they abstract all the hard stuff!</li>
+                <li>Works in unison with <code>Fullscreen</code> and <code>Pointer Lock</code>.</li>
+              </ul>
+            </small>
+            <aside class="notes">
+* 3D tried before (VML, Plugins) - 3D on mobile/desktop
+            </aside>
+            <!-- TODO: Example with image data manipulation -->
+          </section>
+          <section>
+            <h3><a href="https://developer.mozilla.org/en-US/demos/detail/bananabread" target="_blank">Banana Bread (Emscripten)</a></h3>
+            <img src="img/bb.png" />
+          </section>
+          <section>
+            <h3><a href="http://hexgl.bkcore.com/" target="_blank">HexGL (Three.js)</a></h3>
+            <img src="img/hexgl.png" />
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h2>Audio</h2>
+            <p>Load, play and remix Audio data.</p>
+            <pre><code contenteditable>// Load dynamically
+var audio = new Audio();
+audio.src = 'song.ogg';
+audio.addEventListener('audioAvailable', function() {
+  audio.play();
+}, false);</code></pre>
+            <small>
+              <ul>
+                <li><strong>Tip</strong>: <code>MP3</code> is available on Firefox OS and Android.</li>
+              </ul>
+            </small>
+            <aside class="notes">
+* Audio through hidden flash movies - Synchronized audio effects for games
+            </aside>
+          </section>
+          <section>
+            <h3>Tone Generation</h3>
+            <pre><code contenteditable>// Create new instance
+var output = new Audio();
+output.setup(1, 44100);
+
+// Write samples using a JS Array
+var samples = [0.242, 0.127, 0.0, -0.058, -0.242, ...];
+output.writeAudio(samples);
+
+// Tone generation: Pulsing audio
+samples = new Float32Array(22050);
+for (var i = 0; i &lt; samples.length ; i++) {
+  samples[i] = Math.sin( i / 20 );
+}
+output.writeAudio(samples);</code></pre>
+            <p>
+              <small>Methods and events should be prefixed with <code>moz</code>.</small>
+            </p>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h2>WebRTC: getUserMedia</h2>
+            <p>Record and process audio and video streams.</p>
+            <pre><code contenteditable>var video = document.getElementById('my-video');
+
+navigator.getUserMedia({'video': true}, function(mediaStream) {
+  video.src = URL.createObjectURL(mediaStream);
+  video.play();
+}, function(error) {
+  console.error('Video capture error: ', error.code);
+});
+
+// Capture
+var ctx = myCanvas.getContext('2d');
+ctx.drawImage(video, 0, 0);</code></pre>
+            <small>
+              <ul>
+                <li><strong>Options</strong>: <code>video</code>, <code>audio</code> and (non-standard, FF-only) <code>picture</code> for taking snapshots.</li>
+              </ul>
+            </small>
+            <aside class="notes">
+* Flash for webcam access - Record and mash up camera and audio
+            </aside>
+          </section>
+
+          <section>
+            <h3>Taking Snapshots</h3>
+            <iframe src="../demos/gum-snapshot/" width="455" height="356"></iframe>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h2>requestAnimationFrame</h2>
+            <p>Paints synchronized to the refresh rate of the screen, resulting in the most high-fidelity animations.</p>
+            <pre><code contenteditable>var lastTime = null;
+var tick = function(now) {
+  now = Date.now()
+  if (lastTime) myGameUpdate(now - lastTime); // ms since last tick
+  lastTime = now;
+  requestAnimationFrame(tick);
+};
+requestAnimationFrame(tick);</code></pre>
+            <small>
+              <ul>
+                <li><strong>Gotchas</strong>: Tricky API (callback must call rFA again). Automatically paused for unfocussed tabs.</li>
+                <li><strong>Tricks</strong>: Provide your canvas as first argument for internal browser optimization.</li>
+              </ul>
+            </small>
+            <aside class="notes">
+* Timer-based animation callbacks (60+ fps), spinning notebook fans - Hardware synchronized framerates, paused on background.
+            </aside>
+          </section>
+          <section>
+            <h2>Performance.now</h2>
+            <p>High-resolution measurement (floating point instead since page was opened).</p>
+            <pre><code contenteditable>// Performance timer with sub-millisecond resolution
+var lastTime = null;
+var tick = function(now) {
+  now = (now && now > 1e12) ? now : Date.now()
+  if (lastTime) myGameUpdate(now - lastTime); // ms since last tick
+  lastTime = now;
+  requestAnimationFrame(tick);
+};
+requestAnimationFrame(tick);</code></pre>
+            <small>
+              <ul>
+                <li><strong>Use</strong>: Physics simulations or animations benefit from exact timers.</li>
+              </ul>
+            </small>
+            <aside class="notes">
+* Dependence on Date.now() - Timeout independent, high-resolution intervals
+            </aside>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h2>Fullscreen</h2>
+            <p>Open page or one element in full screen.</p>
+            <pre><code contenteditable>// Fullscreen on whole document
+document.requestFullScreen();
+// Fullscreen on one element
+document.getElementById('my-game-canvas').requestFullScreen();
+</code></pre>
+            <small>
+              <ul>
+                <li><strong>Gotchas</strong>: Has to be immediate to an user action. Keys are disabled (Risk of phishing).</li>
+                <li><strong>Tricks</strong>: Control page behaviour with pseudo Tags (<code>:fullscreen</code>, <code>:-moz-full-screen</code>) in CSS and with Events.</li>
+              </ul>
+            </small>
+            <aside class="notes">
+* Game experience limited to the window - Immersive fullscreen experience.
+            </aside>
+          </section>
+          <section>
+            <h2>Pointer Lock</h2>
+            <p>Locks mouse to page for free movement, disabling cursor and window boundaries.</p>
+            <pre><code contenteditable>if (document.fullScreenEnabled) {
+  navigator.pointer.lock(document.body, function() {
+    console.log('Pointer lock worked!');
+  }, function() {
+    console.error('No pointer lock, fall back');
+  };
+}
+
+document.addEventListener('mousemove', function(e) {
+  console.log('Mouse moved by x: %d and y: %d px',
+    e.movementX || 0,
+    e.movementY || 0
+  );
+}, false);</code></pre>
+            <aside class="notes">
+* Limited to point and click controls - First person shooters, flight simulators
+            </aside>
+          </section>
+          <section>
+            <h2>Screen Orientation (&amp; Lock)</h2>
+            <p>Read the screen orientation state, to be informed when this state changes and to be able to lock the screen orientation to a specific state.</p>
+            <pre><code contenteditable>if (window.screen.lockOrientation('landscape-primary')) {
+    console.log('orientation was locked');
+  }
+}</code></pre>
+						<small>
+              <ul>
+                <li><strong>Gotchas</strong>: Only works in unison with fullscreen state.</li>
+                <li><strong>Tricks</strong>: Fix your <code>orientation</code> in the <code>manifest.webapp</code>.</li>
+              </ul>
+            </small>
+            <aside class="notes">
+* Adapt to every screen format - Make it work for one (games!)
+            </aside>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h2>DeviceOrientation &amp; DeviceMotion</h2>
+            <p>Access accelerometers, gyroscopes and compasses.</p>
+						<pre><code contenteditable>window.addEventListener('deviceorientation',function(event){
+  // left-to-right tilt in degrees, where right is positive
+  var tiltLR = event.gamma;
+  // front-to-back tilt in degrees, where front is positive
+  var tiltFB = event.beta;
+  // compass direction the device is facing in degrees
+  var dir = event.alpha
+
+  // call our orientation event handler
+  rotateMyStuff(tiltLR, tiltFB, dir);
+}, false);</code></pre>
+						<small>
+              <ul>
+                <li><strong>Gotchas</strong>: Track screen orientation to normalize values.</li>
+                <li><strong>Use</strong>: Gyroscope controlled games. Augmented reality!</li>
+              </ul>
+            </small>
+          </section>
+          <section>
+            <h3>Watch it Live</h3>
+            <video class="preview" width="640" height="480"></video>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h2>Battery</h2>
+            <p>Read and track battery levels and charging state.</p>
+            <pre><code contenteditable>var battery = navigator.battery;
+console.log('Battery charging: ', battery.charging); // true
+console.log('Battery level: ', battery.level); // 0.58
+console.log('Battery discharging time: ', battery.dischargingTime);
+
+// Listen to change events
+battery.addEventListener('chargingchange', function(e) {
+  console.warn('Battery charge change: ', battery.charging);
+}, false);</code></pre>
+						<small>
+              <ul>
+                <li><strong>Use</strong>: Warn games when battery is low. Prompt users to do intense processing only when plugged in.</li>
+              </ul>
+            </small>
+          </section>
+          <section>
+            <h3>Works on all Platforms!</h3>
+            <iframe src="../demos/battery-meter/" width="455" height="356"></iframe>
+          </section>
+        </section>
+
+        <section>
+					<section>
+						<h2>Geo Location</h2>
+						<p>Track users location and movement.</p>
+						<pre><code contenteditable>navigator.geolocation.getCurrentPosition(function(position) {
+    var coords = position.coords;
+    myMapUpdate(
+      coords.latitude, coords.longitude, // (decimal degrees)
+      coords.altitude, // (meters)
+      coords.heading, // (degrees clockwise from true north)
+      coords.speed // (meters/second)
+    );
+  }, function(error) {
+    if (error.code == 1) { // Permission denied
+      myGracefulFallback();
+    }
+}, {maximumAge: 75000});</code></pre>
+						<small>
+	            <ul>
+	              <li><strong>Gotchas</strong>: Drains battery.</li>
+	              <li><strong>Use</strong>: Location based services.</li>
+	            </ul>
+	          </small>
+					</section>
+          <section>
+            <h3>Options</h3>
+            <ul>
+							<li><code>enableHighAccuracy</code>: default false, true might be slower</li>
+							<li><code>timeout</code>: milliseconds</li>
+							<li><code>maximumAge</code>: milliseconds</li>
+            </ul>
+          </section>
+        </section>
+
+        <section>
+          <h2>Ambient Light</h2>
+          <p>Detect light intensity around the device.</p>
+          <pre><code contenteditable>window.addEventListener('devicelight', function(vet) {
+  console.log('SI lux', evt.value);
+}, true);</code></pre>
+					<small>
+            <ul>
+              <li><strong>Gotchas</strong>: Activated/deactivated when event is added/removed.</li>
+              <li><strong>Use</strong>: Night/Day mode.</li>
+            </ul>
+          </small>
+        </section>
+
+        <section>
+          <h2>Proximity Sensor</h2>
+          <p>Detect if the device screen is covered (while calling).</p>
+          <pre><code contenteditable>window.addEventListener('userproximity', function(evt) {
+  console.log(evt.near ? 'Hello' : 'Come closer!');
+}, true);</code></pre>
+					<small>
+            <ul>
+              <li><strong>Gotchas</strong>: Activated/deactivated when event is added/removed.</li>
+              <li><strong>Use</strong>: Pause app when user holds the phone to her ear.</li>
+            </ul>
+          </small>
+        </section>
+
+        <section>
+          <h2>Vibration</h2>
+          <p>Uhm, vibrate!</p>
+          <pre><code contenteditable>// Single vibration
+navigator.mozVibrate(200);
+// Pattern
+navigator.mozVibrate([200, 100, 200, 100, 400]);
+// Cancel existing vibrations
+navigator.mozVibrate(0);</code></pre>
+        </section>
+
+        <section>
+	        <section>
+	          <h2>Contacts</h2>
+	          <p>Read/write address book access.</p>
+	          <pre><code contenteditable>var record = {givenName: 'Harald', familyName: 'Kirschner'},
+  contact = new mozContact();
+contact.init(record);
+var request = navigator.mozContacts.save(contact);
+request.onsuccess = function() {
+  // .result is mozContact with id
+  console.log('Saved contact #' + request.result.id);
+};
+request.onerror = function(error) {
+  console.error('Could not save contact: ' + error);
+};</code></pre>
+	        </section>
+	        <section>
+	          <h3>Find contacts</h3>
+	          <pre><code contenteditable>var request = navigator.mozContacts.find({});
+request.onsuccess = function () {
+  console.log(request.result.length + ' mozContacts');
+  listMyContacts(request.result);
+}
+// Alternative query:
+// find({filterBy: ["id"], filterOp: "equals", filterValue: myId})</code></pre>
+	        </section>
+	      </section>
+
+        <section>
+	        <section>
+	          <h2>Telephony</h2>
+	          <p>Dial out and mediate calls, i.e. answer, reject, hold or resume a call.</p>
+	          <pre><code contenteditable>// First, obtain a telephony object.
+var telephony = navigator.mozTelephony;
+// Check if the speaker is enabled or phone is muted.
+concole.log(telephony.speakerEnabled, telephony.muted);
+// Then, we dial out.
+var outgoing = telephony.dial(myPhoneNumber);
+// Event handlers for the call.
+outgoing.onconnected = function(event) {
+  /* Do something when the callee picks up the call. */
+};
+outgoing.ondisconnected = function(event) {
+  /* Do something when the call finishes. */
+};</code></pre>
+	        </section>
+	        <section>
+	          <h3>Mediate Calls</h3>
+	          <pre><code contenteditable>// Receive an incoming call.
+telephony.onincoming = function onincoming(event) {
+  var incoming = event.call;
+  if (incoming.number == myBlockedNumber) {
+    // Hang up
+    incoming.hangUp();
+    return;
+  }
+  // Answer the call.
+  incoming.answer();
+};</code></pre>
+	        </section>
+	       </section>
+
+        <section>
+          <h2>SMS</h2>
+          <p>Send, receive and manage SMS messages.</p>
+          <pre><code contenteditable>var request = navigator.mozSms.send(myNumber, "Hello World!");
+request.onsuccess = function() {
+  var message = request.result;
+  console.log(
+    message.delivery, // 'sent' or 'received'
+    message.read // boolean
+  );
+}
+request.onerror = function(error) {
+  console.error('Could not send message: ' + error);
+}</code></pre>
+        </section>
+
+        <section>
+	        <section>
+	          <h2>Web Activities</h2>
+	          <p>Launch and register delegated activities for your app.</p>
+	          <ul>
+							<li>Basic activities will have simple names like <code>edit</code>, <code>view</code>, <code>pick</code> or <code>share</code></li>
+							<li>Any application will be able to create new activities.</li>
+							<li>The following examples are just snapshots to get an idea!</li>
+	          </ul>
+          <aside class="notes">
+* Like Android Web Intents, but simplified.
+          </aside>
+	        </section>
+	        <section>
+	          <h3>Launch an activity</h3>
+	          <pre><code contenteditable>// Launch an activity: Pick an image
+var act = new Activity({
+  name: "pick",
+  data: { type: "image/png", multiple: false }
+});
+act.onsuccess = function() {
+  processMyImage(a.result);
+});
+act.onerror = function() {
+  alert("Oops: " + this.result.error.name);
+});</code></pre>
+	        </section>
+
+	        <section>
+	          <h3>Declare registration in Webapp Manifest</h3>
+	          <pre><code contenteditable>// Declarative registration
+"activities": {
+  "share": {
+    "filters": {
+      "type": ["image/png", "image/gif"]
+    },
+    "href": "foo.html",
+    "disposition": "window"
+  }
+}</code></pre>
+	        </section>
+	        <section>
+	          <h3>Register to handle an activity</h3>
+	          <p>Pick a png image and return what the user had picked</p>
+	          <pre><code contenteditable>var req = navigator.registerActivityHandler({
+  name: "pick",
+  disposition: "inline",
+  filters: { type: "image/png", "image/gif" },
+  returnValue: true
+});
+req.onerror = function() { alert("failed to register activity"); }
+
+navigator.setMessageHandler('activity', function(act) {
+  showMyImageSelector(function(img) {
+    if (!image) {
+      act.postError("NoImage");
+      return;
+    }
+    act.postResult({ type: "image/png", url: image });
+  });
+});</code></pre>
+	        </section>
+	      </section>
+
+        <section>
+          <h2>Web Sockets</h2>
+          <p>Full-duplex single socket connection over which messages can be sent between client and server.</p>
+          <pre><code contenteditable>var ws = new WebSocket('ws://echo.websocket.org/');
+ws.onopen = function (evt) {
+  ws.send('Rock it with Websockets!');
+};
+ws.onmessage = function (evt) {
+  console.log('Got message: ' + evt.data);
+};
+ws.onclose = function(evt) {
+  console.log('Disconnected');
+};</code></pre>
+          <small>
+            <ul>
+              <li><strong>Tips</strong>: Persistent connection saves time/battery/bandwidth, especially on phones.</li>
+              <li><strong>Gotchas</strong>: Sometimes blocked by (badly configured) firewalls and proxies, so consider fallbacks.</li>
+              <li><strong>Use</strong>: Real-time! Games, collaboration, chats, analytics, behavioural tracking, etc.</li>
+            </ul>
+          </small>
+          <!-- DEMO -->
+        </section>
+
+        <section>
+          <section>
+            <h2>EventSource - Server-sent Events</h2>
+            <p>Method of continuously sending data from a server to the browser, rather than repeatedly requesting it.</p>
+            <pre><code contenteditable>var url = 'streams/events';
+var eventSrc = new EventSource(url);
+eventSrc.addEventListener('open', function (event) {
+  console.log(event.type + ': ' + event.data);
+});
+eventSrc.addEventListener('article', function (event) {
+  var article = JSON.parse(event.data);
+  console.log('New article: ' + article.title);
+});</code></pre>
+            <small>
+              <ul>
+                <li><strong>Tips</strong>: Persistent connection saves time/battery/bandwidth again, especially on phones. Supports CORS in FF.</li>
+              </ul>
+            </small>
+          </section>
+          <section>
+            <h2>Event stream format</h2>
+            <pre><code contenteditable>event: message
+data: Anything goes here
+
+event: article
+data: {"title":"New Stuff!","url": "http://…","time":138567945679}</code></pre>
+            <small>
+              <ul>
+                <li><strong>Available fields</strong>: <code>event</code> (for named events), <code>data</code>, <code>id</code> and <code>retry</code>.</li>
+                <li><strong>MIME-type</strong>: <code>text/event-stream</code></li>
+              </ul>
+            </small>
+          </section>
+          <section>
+            <h2>Tweet to see things happen!</h2>
+            <iframe src="http://digitarald.eventsource-twitter.jit.su/" width="455" height="356"></iframe>
+          </section>
+          <!-- DEMO -->
+        </section>
+
+        <section>
+          <h2>Push Notifications</h2>
+          <p>Send small messages to users when the user is not on the site.</p>
+          <pre><code contenteditable>var push = navigator.push;
+// Ask the user to allow notifications
+var request = push.requestURL(waToken, publicKey);
+request.onsuccess = function() {
+  var url = request.result.url;
+  // We got a new push URL, store it on the server.
+  jQuery.post('/my-push-urls/', {url: url});
+};</code></pre>
+          <small>
+            <ul>
+              <li><strong>waToken</strong>: Web App Token identifies uniquely the user (or installation) of the app.</li>
+              <li><strong>WAToken</strong>: Cryptographic key to verify the origin of the notification.</li>
+              <li>App server posts JSON updates to the returned URL (TBD).</li>
+            </ul>
+          </small>
+        </section>
+
+        <section>
+          <section>
+            <h2>File, Blob and FileReader</h2>
+            <p>Manipulating file objects in web applications client-side; also programmatically selecting them and accessing their data.</p>
+            <pre><code contenteditable>// Called in myFileInput.onchange or myForm.onsubmit
+var file = myFileInput.files[0];
+// Read in selected file
+var reader = new FileReader();
+reader.onload = function(evt) {
+  myPreview.title = file.name;
+  myPreview.src = evt.target.result;
+  // Or as style
+  var style = 'url(' + evt.target.result + ')';
+  myPreview.style.backgroundImage = style;
+};
+reader.readAsDataURL(file);</code></pre>
+            <small>
+              <ul>
+                <li><strong>Tips</strong>: Mix and match File APIs with Canvas, Video, Audio and XHR2.</li>
+                <li><strong>Use</strong>: Image manipulation. File viewer. Dynamically generate downloads.</li>
+              </ul>
+            </small>
+          </section>
+          <section>
+            <h3>Demo: Image Drop</h3>
+            <iframe src="../demos/image-drop/" width="455" height="356"></iframe>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h2>XMLHttpRequest2</h2>
+            <p>Adds more functionality to AJAX requests like file uploads, transfer progress information and the ability to send form data.</p>
+            <pre><code contenteditable>var data = new FormData();
+
+// Automatic string conversion for everything
+data.append('username', 'digitarald');
+data.append('accountnum', 123456);.
+data.append('userfile', myFileInput.files[0]);
+
+var req = new XMLHttpRequest();
+req.open('POST', '/submit-form');
+req.send(data);
+
+// Alternative: From Element
+var data = new FormData(myFormElement);</code></pre>
+            <small>
+              <ul>
+                <li><strong>Use</strong>: Mash-ups with cross-origin data. Load, manipulate and save binary files.</li>
+              </ul>
+            </small>
+          </section>
+          <section>
+            <h3>Cross-Origin Resource Sharing (CORS)</h3>
+            <p>HTTP header for public data:</p>
+            <pre><code contenteditable>Access-Control-Allow-Origin: *</code></pre>
+            <p>HTTP header for limited access:</p>
+            <pre><code contenteditable>Access-Control-Allow-Origin: http://www.website-requesting-data.com</code></pre>
+            <p>Ajax as usual:</p>
+            <pre><code contenteditable>var xhr = new XMLHttpRequest();
+xhr.open('GET', 'http://www.data-provider.com/public-data.json');
+xhr.onload = function(e) {
+  var data = JSON.parse(this.response);
+}
+xhr.send();</code></pre>
+          </section>
+        </section>
+
+        <section>
+          <h2>Web Workers</h2>
+          <p>Running scripts in the background, isolated from the web page.</p>
+          <pre><code contenteditable>// my_task.js will run in its background threads
+var worker = new Worker('my_task.js');
+worker.addEventListener('message', function(event) {
+  console.log('Worker send a message back: ' + event.data);
+}, false);
+
+// Start the worker.
+worker.postMessage(JSON.stringify(myWorkerData));</code></pre>
+          <small>
+            <ul>
+              <li><strong>Gotchas</strong>: Worker has no DOM APIs, you can crunch data but can't draw canvas.</li>
+              <li><strong>Use</strong>: Image and other Binary Data Manipulation. Game Physics. Crunching Data.</li>
+            </ul>
+          </small>
+        </section>
+
+        <section>
+          <section>
+            <h2>Typed Arrays</h2>
+            <p>JavaScript typed arrays provide a mechanism for accessing raw binary data much more efficiently.</p>
+            <pre><code contenteditable>// a buffer with 16 bytes
+var buffer = new ArrayBuffer(16);
+// a view treating the data as 32-bit signed integers
+var int32View = new Int32Array(buffer);
+// Access the fields in the array just like a normal array
+for (var i=0; i &lt; int32View.length; i++) {
+  int32View[i] = i*2;
+}</code></pre>
+            <small>
+              <ul>
+                <li>Created for the WebGL, but also implemented for Audio, Video, WebSockets, Canvas and binary data manipulation.</li>
+                <li><strong>Gotchas</strong>: Optimized for reading and iterating, initialization can be slow (compared to <code>Array</code>).</li>
+                <li><strong>Use</strong>: For everything binary and super fast arrays.</li>
+              </ul>
+            </small>
+          </section>
+          <section>
+            <h3>Structured Cloning & Transferable Objects!</h3>
+            <p>Makes <code>Typed Arrays</code> the fastest way to get data from and to <code>Web Workers</code>.</p>
+            <pre><code contenteditable>worker.postMessage = worker.webkitPostMessage || worker.postMessage;
+
+var bigData = new ArrayBuffer(1);
+// // New argument: postMessage(message, targetOrigin, transferables);
+worker.postMessage({other: 'data', data: bigData}, [bigData]);
+if (bigData.byteLength) {
+  console.error('Transferables are not supported in your browser!');
+} else {
+  // Buffer got reset, transferables are supported.
+}</code></pre>
+          </section>
+        </section>
+
+        <section>
+          <h2>Device Storage</h2>
+          <p>Read/write access for files in predefined directories (pictures, music, movies, etc).</p>
+          <pre><code contenteditable>var name = "my-cat-with-80s-camera-filter.png",
+  storage = navigator.getDeviceStorage("pictures"),
+  request = storage.addNamed(myImageBlob, name);
+request.onsuccess = function() {
+  console.log('%d saved', this.result.name);
+  // storage.delete(name)
+};
+request.onerror = function() {
+  console.log('Could not save picture, #' + this.result.code);
+};</code></pre>
+        </section>
+
+        <section>
+          <section>
+            <h2>Offline</h2>
+            <h3>A symphony of multiple APIs.</h3>
+            <p>... and easier for packaged apps.</p>
+          </section>
+          <section>
+            <h2>Web Storage</h2>
+            <p>Key-value storage for sessions or persistent.</p>
+            <pre><code contenteditable>sessionStorage.setItem('username', 'digitarald');
+if (sessionStorage.getItem('username')) {
+  alert('Welcome ' + sessionStorage.setItem('username'));
+}
+
+// More data
+localStorage.setItem('profile', JSON.stringify(profile));
+// Reading JSON
+var profile = JSON.parse(localStorage.getItem('profile'));
+
+// On logout ...
+localStorage.removeItem('profile');
+// or
+localStorage.clear();</code></pre>
+          </section>
+          <section>
+            <h2>IndexedDB</h2>
+            <p>Transaction-based Big Data for the browser.</p>
+            <small>
+              <ul>
+                <li><strong>Gotchas</strong>: Callbacks may result in verbose code.</li>
+                <li><strong>Tips</strong>: Designed very versatile, also to be used as FileSystem alternative.</li>
+              </ul>
+            </small>
+          </section>
+          <section>
+            <h2>Offline Application Cache</h2>
+            <p>TODO.</p>
+            <pre><code contenteditable>&lt;html manifest=&quot;/offline.manifest&quot;&gt;</code></pre>
+            <pre><code contenteditable>CACHE MANIFEST
+# v1.3 16-11-1012
+index.html
+css/style.css
+js/app.js
+images/logo.png
+
+NETWORK:
+login-page
+http://api.more-data.com</code></pre>
+            <small>
+              <ul>
+                <li><strong>Gotchas</strong>: Use build scripts to update the cache during development.</li>
+                <li><strong>Tips</strong>: Add version number/date to force invalidation on manifest update.</li>
+              </ul>
+            </small>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h2>Moving Targets</h2>
+            <h3>... developing with Web APIs</h3>
+          </section>
+          <section>
+            <h3>Prefixes</h3>
+            <ul>
+              <li>Feature Detection</li>
+              <li>Use Polyfills</li>
+              <li>Use Shims</li>
+            </ul>
+          </section>
+          <section>
+            <h3>Prefixes</h3>
+            <pre><code contenteditable>element.requestFullScreen =
+  element.requestFullScreen ||
+  element.mozRequestFullScreen ||
+  element.webkitRequestFullScreen;</code></pre>
+            <pre><code contenteditable>element.requestFullScreen(element.ALLOW_KEYBOARD_INPUT);</code></pre>
+          </section>
+          <section>
+            <h3>You thought prefixes are bad?</h3>
+            <ul>
+              <li>Good News: Prefixes are going</li>
+              <li>Bad News: You thought prefixes are bad? To move/break even faster, WebRTC got version numbers! <code>webkitPeerConnection00</code></li>
+            </ul>
+          </section>
+          <section>
+            <h2>Moving Targets</h2>
+            <h3>... developing with Web APIs</h3>
+          </section>
+        </section>
+
+        <section>
+          <h2>Calls to Action</h2>
+          <ul>
+            <li class="fragment"><strong></strong> </li>
+            <li class="fragment"><strong>!</strong> .</li>
+            <li class="fragment"><strong></strong> </li>
+          </ul>
+          <section>
+            <h3>Experiment!</h3>
+            <p>Discover by doing.</p>
+          </section>
+          <section>
+            <h3>Share!</h3>
+            <p>Help the community by sharing your experience.</p>
+          </section>
+          <section>
+            <h3>Scratch your own Itch!</h3>
+            <p>Solving a problem you have might be as useful for others.</p>
+          </section>
+        </section>
+
+        <section>
+          <h2>Questions? Anytime!</h2>
+          <h3>@digitarald</h3>
+          <h3>harald@mozilla.com</h3>
+        </section>
+
+			</div>
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.min.js"></script>
+
+		<script>
+
+			// Full list of configuration options available here:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+
+				progress: true,
+
+				history: true,
+
+				transition: 'default', // default/cube/page/concave/zoom/linear/none
+
+				// Optional libraries used to extend on reveal.js
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/showdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+					{ src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+				]
+			});
+
+			// Un-prefix
+			navigator.getUserMedia = navigator.getUserMedia || navigator.mozGetUserMedia || navigator.webkitGetUserMedia || null;
+
+			var mediaStreamUrl = null, video = null;
+
+			Reveal.addEventListener('slidechanged', function(event) {
+        if (window.parent != window) {
+          return;
+        }
+
+				var slideElement = event.currentSlide;
+
+				var iframes = slideElement.getElementsByTagName('iframe');
+				if (iframes[0]) {
+					iframes[0].src = iframes[0].src;
+				}
+
+				if (navigator.getUserMedia) {
+					if (video) {
+						video.pause();
+						video = null;
+					}
+
+					var videos = slideElement.getElementsByClassName('preview');
+					if (video = videos[0]) {
+						// Ask for local MediaStream from camera
+						if (!mediaStreamUrl) {
+							navigator.getUserMedia({'video': true}, function(mediaStream) {
+								mediaStreamUrl = URL.createObjectURL(mediaStream);
+							  video.src = mediaStreamUrl;
+							  video.play();
+							  video.width = video.width; // force rendering
+							}, function(error) {
+							  console.error('Video capture error: ', error.code);
+							});
+						} else {
+							video.src = mediaStreamUrl;
+						  video.play();
+						}
+					}
+				}
+			});
+
+      window.addEventListener( 'message', function( event ) {
+        var data = JSON.parse( event.data );
+        if (data.next) {
+          Reveal.next()
+        } else {
+          Reveal.prev();
+        }
+      });
+		</script>
+
+	</body>
+</html>
