@@ -1,12 +1,18 @@
-# Apps Dissected
+# Mozilla Presentation
 
-## APIs as Awesome Sauce
+## Introduction
 
-[Watch the Slides](http://mca.testno.de/slides/)
+As a mozillian, I give out presentation on various occasions from time to time, and I always use my own modified version of Harald Kirschner's html slide, which appears very cool and helpful.
+
+Through this fork I maintain my own modification, keep contents up to date and hold historical changes. Currently it's in Chinese only.
+
+[Watch the Slides](http://medopaw.github.io/mozilla-presentation/slides)
 
 ## License (Slides, Demos & Code)
 
 (The MIT License)
+
+Copyright (c) 2013 Med0paW <medopaw@gmail.com>
 
 Copyright (c) 2012 Harald Kirschner <harald@mozilla.com>
 

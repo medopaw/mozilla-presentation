@@ -1,0 +1,4 @@
+# .gitignore - List of filenames git should ignore
+
+# Vim swap files.
+.*.sw[a-z]
